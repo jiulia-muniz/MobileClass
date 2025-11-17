@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "178811240373",
+    "project_id": "bdapp-8dfb8",
+    "storage_bucket": "bdapp-8dfb8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178811240373:android:c010d0e41f8ee5727763fc",
+        "android_client_info": {
+          "package_name": "com.bdapp.bdapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0HKWvqRxVA8t-rSg0px_b12jP0M3yL6w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
