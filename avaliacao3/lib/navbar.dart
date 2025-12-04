@@ -1,6 +1,7 @@
+import 'package:avaliacao3/compra.dart';
 import 'package:avaliacao3/home.dart';
+import 'package:avaliacao3/cart.dart';
 import 'package:flutter/material.dart';
-
 
 class NavBar extends StatefulWidget {
   const NavBar({super.key});
@@ -10,37 +11,44 @@ class NavBar extends StatefulWidget {
 }
 
 class _NavBarState extends State<NavBar> {
-  int myindex = 0; // variavel que indica o index da tela desejada
-
-  void changeindex(int newindex){
-    setState(() {
-      myindex = newindex;
-    });
-  }
+  int myindex = 1; // começa na Home
 
   List<Widget> screens = [
-    Home(),
-    Home(),
-    // Tela2(),
-    // Tela3()
-    
+    CartPage(),  // carrinho
+    Home(),      // home
+    CompraTela(),      // perfil (coloque sua tela depois)
   ];
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+            debugShowCheckedModeBanner: false,
+
       home: Scaffold(
-        body: screens.elementAt(myindex),// o conteudo sera algum elemento da lista
-        bottomNavigationBar: // footer, barra de navegação
-        BottomNavigationBar(items: <BottomNavigationBarItem> [
-          BottomNavigationBarItem(label:"Tela 1", icon: Icon(Icons.heat_pump_rounded)),
-          BottomNavigationBarItem(label:"Tela 2", icon: Icon(Icons.heat_pump_rounded)),
-          // BottomNavigationBarItem(label:"Tela 3", icon: Icon(Icons.heat_pump_rounded))
-        ],
-        currentIndex: myindex, //Currentindex: qual o index atual? R: my index
-        onTap: changeindex, // ontap: qual a função que muda o index? R: changeindex
+        body: screens[myindex],
+
+        bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Colors.white,
+          currentIndex: myindex,
+          onTap: (index) {
+            setState(() => myindex = index);
+          },
+
+          selectedItemColor: Colors.orange,
+          unselectedItemColor: Colors.orange,
+
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.shopping_cart),
+              label: "carrinho",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: "home",
+            )
+          ],
         ),
-      )
+      ),
     );
   }
 }

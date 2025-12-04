@@ -1,7 +1,8 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:avaliacao3/main.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -11,7 +12,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<dynamic>? valor;
+  List<Map<String, dynamic>> valor = [];
 
   @override
   void initState() {
@@ -20,77 +21,170 @@ class _HomeState extends State<Home> {
   }
 
   void getvalor() async {
-    final response = await http.get(
-      Uri.parse("https://swapi.dev/api/people/"),
+    FirebaseFirestore.instance.collection("produtos").snapshots().listen((
+      snapshot,
+    ) {
+      setState(() {
+        valor = snapshot.docs
+            .map((doc) => doc.data() as Map<String, dynamic>)
+            .toList();
+      });
+    });
+  }
+
+  Future<void> PostCarrinho (dynamic item) async {
+    FirebaseFirestore.instance.collection("carrinho").add({
+      "produto": item
+
+    }
+
     );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      setState(() {
-        valor = data["results"];
-      });
-    }
-  }
+
+  } 
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text(
-            "Todos os personagens",
-            style: TextStyle(color: Colors.white),
-          ),
+          backgroundColor: Colors.white,
+          toolbarHeight: 220,
           centerTitle: true,
-          toolbarHeight: 120,
-          backgroundColor: const Color.fromARGB(255, 23, 99, 109),
+          title: Image.asset("assets/images/whitee.png", height: 200),
         ),
-        body: valor == null
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: valor!.length,
-                      itemBuilder: (context, index) {
-                        final item = valor![index];
-                        return Column(
-                          children: [
-                            const SizedBox(height: 30),
-                            Container(
-                              width: double.infinity,
-                              height: 100,
-                              color: Colors.indigo,
-                              child: Center(
-                                child: Text(
-                                  "${item["name"]}",
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.white,
-                                  ),
-                                  textAlign: TextAlign.center,
+
+        // ----------------------- CONTEÚDO -----------------------
+        body: Stack(
+          children: [
+            // FUNDO
+            SizedBox.expand(
+              child: Image.asset("assets/images/bg.png", fit: BoxFit.cover),
+            ),
+
+            // CONTEÚDO POR CIMA DO FUNDO
+            valor.isEmpty
+                ? Center(child: CircularProgressIndicator())
+                : Column(
+                    children: [
+                      Expanded(
+                        child: GridView.builder(
+                          padding: EdgeInsets.only(top: 20),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                childAspectRatio: 0.62,
+                                crossAxisSpacing: 30,
+                                mainAxisSpacing: 20,
+                              ),
+                          itemCount: valor.length,
+                          itemBuilder: (context, index) {
+                            final item = valor[index];
+
+                            return Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              child: Container(
+                                width: 60,
+                                height: 300,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 8,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.vertical(
+                                        top: Radius.circular(16),
+                                      ),
+                                      child: Image.network(
+                                        item["image"],
+                                        height: 190,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+
+                                    Padding(
+                                      padding: EdgeInsets.all(12),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item["nome"],
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+
+                                          SizedBox(height: 8),
+
+                                          Text(
+                                            "R\$ ${item["preco"]}/unid",
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              color: Colors.black54,
+                                            ),
+                                          ),
+
+                                          SizedBox(height: 12),
+
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+
+                                              GestureDetector(
+                                                child:  Container(
+                                                width: 36,
+                                                height: 36,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.orange,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    "+",
+                                                    style: TextStyle(
+                                                      fontSize: 22,
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              onTap: () {
+                                                PostCarrinho(item);
+                                              },
+                                              )
+                                             
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 20),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginPage(),
+                            );
+                          },
                         ),
-                      );
-                    },
-                    child: const Text("ver tudo"),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+          ],
+        ),
       ),
     );
   }
